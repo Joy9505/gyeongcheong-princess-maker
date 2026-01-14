@@ -1,10 +1,11 @@
 /**********************
- * 경청프린세스 메이커
- * - 60개 상황 
- * - 20턴 진행
- * - 선택 전 경험치 비공개, 선택 후 공개(오버레이)
- * - 선택 후 카드 flip으로 다음 카드 자동 진행
+ * 경청프린세스 메이커 (GAME OVER 룰 반영)
+ * - 5개 스탯 각 5점 시작
+ * - 행동 "한다" 선택 시에만 경험치 반영
+ * - 반영 후 어느 하나라도 0 이하가 되면 즉시 GAME OVER
+ * - 20턴 완료 또는 게임오버 시 결과 저장 + 대시보드 표시
  **********************/
+
 
 const RAW_SITUATIONS = [
   { text: "친구들을 만나서 신나게 논다.", delta: { social:+1, money:-2, hp:-1 } },
@@ -117,7 +118,6 @@ const cardImg = document.getElementById("cardImg");
 const photoOverlay = document.getElementById("photoOverlay");
 
 const promptText = document.getElementById("promptText");
-const actionButtons = document.getElementById("actionButtons");
 const doBtn = document.getElementById("doBtn");
 const skipBtn = document.getElementById("skipBtn");
 const autoHint = document.getElementById("autoHint");
@@ -138,9 +138,13 @@ const boardToGameBtn = document.getElementById("boardToGameBtn");
 
 let princessName = "";
 let deck = [];
-let turn = 0;
+let turn = 0;            // 0-based
 let currentCard = null;
 let stats = null;
+
+let gameEnded = false;   // 종료(완주/게임오버) 플래그
+let endStatus = "COMPLETED"; // "COMPLETED" | "GAME_OVER"
+let endedAtTurn = 0;     // 1..20
 
 const INITIAL_STATS = { hp:5, money:5, charm:5, intel:5, social:5 };
 
@@ -160,6 +164,10 @@ function shuffle(array) {
 
 function totalScore(s) {
   return s.hp + s.money + s.charm + s.intel + s.social;
+}
+
+function isGameOver(s) {
+  return s.hp <= 0 || s.money <= 0 || s.charm <= 0 || s.intel <= 0 || s.social <= 0;
 }
 
 function renderStats(where, s) {
@@ -182,8 +190,8 @@ function renderStats(where, s) {
 }
 
 function renderHUD() {
-  princessLabel.textContent = `${princessName} 공주`;
-  turnLabel.textContent = `턴 ${turn + 1} / 20`;
+  princessLabel.textContent = `${princessName}`;
+  turnLabel.textContent = `턴 ${Math.min(turn + 1, 20)} / 20`;
   deckLabel.textContent = `덱: ${deck.length}장`;
   renderStats(statsBox, stats);
 }
@@ -215,10 +223,14 @@ function setCard(card) {
 
   doBtn.disabled = false;
   skipBtn.disabled = false;
-  actionButtons.classList.remove("hidden");
   autoHint.style.display = "none";
 
   renderHUD();
+
+  if (!gameEnded && isGameOver(stats)) {
+    endGame("GAME_OVER", Math.max(1, Math.min(20, turn + 1)));
+    return;
+  }
 }
 
 function drawFirstCard() {
@@ -232,8 +244,9 @@ function sleep(ms) {
 }
 
 async function flipToNextCard() {
+  // 20턴을 모두 끝냈으면 종료
   if (turn >= 19) {
-    await endGame();
+    await endGame("COMPLETED", 20);
     return;
   }
 
@@ -251,11 +264,14 @@ async function flipToNextCard() {
 }
 
 async function choose(doIt) {
+  if (gameEnded) return;
+
   doBtn.disabled = true;
   skipBtn.disabled = true;
 
   const delta = currentCard._delta;
 
+  // 1) 선택 결과 표시 + (한다면) 스탯 반영
   if (doIt) {
     photoOverlay.innerHTML = `
       <div>
@@ -264,6 +280,7 @@ async function choose(doIt) {
       </div>
     `;
     photoOverlay.classList.remove("hidden");
+
     applyDelta(stats, delta);
   } else {
     photoOverlay.innerHTML = `
@@ -275,37 +292,75 @@ async function choose(doIt) {
     photoOverlay.classList.remove("hidden");
   }
 
-  promptText.textContent = "다음 카드로 넘어간다…";
-  autoHint.style.display = "block";
+  // 2) HUD는 항상 갱신
   renderHUD();
 
+  // ✅ 3) 규칙: “하나라도 0점이 되면 즉시 게임오버”
+  // (한다/안한다 상관 없이 무조건 체크)
+  if (isGameOver(stats)) {
+    const endedTurnHuman = turn + 1; // 현재 턴에서 종료
+    promptText.textContent = "게임오버…";
+    autoHint.style.display = "block";
+    await sleep(650);
+    await endGame("GAME_OVER", endedTurnHuman);
+    return;
+  }
+
+  // 4) 정상 진행
+  promptText.textContent = "다음 카드로 넘어간다…";
+  autoHint.style.display = "block";
+
   await sleep(650);
+
   turn += 1;
   await flipToNextCard();
 }
 
-async function endGame() {
+async function endGame(status, endedTurnHuman) {
+  if (gameEnded) return;
+
+  gameEnded = true;
+  endStatus = status;
+  endedAtTurn = endedTurnHuman;
+
   const total = totalScore(stats);
 
   showScreen(screenResult);
+
   finalTotalEl.textContent = String(total);
   renderStats(finalStatsEl, stats);
 
-  resultTitle.textContent = `${princessName} 공주, 20턴 완주 성공`;
-  resultSub.textContent = "최종 경험치를 대시보드에 저장 중…";
+  if (status === "GAME_OVER") {
+    resultTitle.textContent = `${princessName}, 게임오버 (턴 ${endedTurnHuman})`;
+    resultSub.textContent = "경험치가 0이 되어 게임이 종료됐다. 기록 저장 중…";
+  } else {
+    resultTitle.textContent = `${princessName}, 20턴 완주 성공`;
+    resultSub.textContent = "최종 경험치를 대시보드에 저장 중…";
+  }
 
   try {
     const res = await fetch("/api/score", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ princessName, stats, total }),
+      body: JSON.stringify({
+        princessName,
+        stats,
+        total,
+        status,
+        endedAtTurn: endedTurnHuman
+      }),
     });
+
     const data = await res.json();
     if (!data.ok) throw new Error();
 
     localStorage.setItem("gpm:lastEntryId", data.entry.id);
     localStorage.setItem("gpm:lastPrincessName", princessName);
-    resultSub.textContent = "최종 경험치를 대시보드에 저장했다.";
+
+    resultSub.textContent =
+      status === "GAME_OVER"
+        ? "게임오버 기록을 대시보드에 저장했다."
+        : "완주 기록을 대시보드에 저장했다.";
   } catch {
     resultSub.textContent = "서버 저장에 실패했다. (서버 실행 여부를 확인해줘)";
   }
@@ -316,12 +371,17 @@ function resetGame() {
   stats = { ...INITIAL_STATS };
   deck = shuffle(SITUATIONS).map(s => ({ ...s }));
   currentCard = null;
+
+  gameEnded = false;
+  endStatus = "COMPLETED";
+  endedAtTurn = 0;
+
   renderHUD();
 }
 
 async function loadDashboard() {
   showScreen(screenBoard);
-  boardBody.innerHTML = `<tr><td colspan="9" class="muted">불러오는 중…</td></tr>`;
+  boardBody.innerHTML = `<tr><td colspan="11" class="muted">불러오는 중…</td></tr>`;
 
   const myId = localStorage.getItem("gpm:lastEntryId");
 
@@ -336,10 +396,10 @@ async function loadDashboard() {
     myRankBox.innerHTML =
       meIndex >= 0
         ? `<div><strong>현재 내 순위: ${meIndex + 1}위</strong></div><div class="muted">총점 기준 정렬</div>`
-        : `<div><strong>현재 내 순위:</strong> 기록이 없거나 다른 브라우저/기기에서 플레이했다.</div><div class="muted">게임 종료 시 자동 기록</div>`;
+        : `<div><strong>현재 내 순위:</strong> 아직 플레이한 기록이 없다.</div><div class="muted">게임 종료 시 자동 기록</div>`;
 
     if (entries.length === 0) {
-      boardBody.innerHTML = `<tr><td colspan="9" class="muted">아직 기록이 없다. 첫 번째 공주가 되어줘.</td></tr>`;
+      boardBody.innerHTML = `<tr><td colspan="11" class="muted">아직 기록이 없다. 첫 번째 공주가 되어줘.</td></tr>`;
       return;
     }
 
@@ -347,10 +407,19 @@ async function loadDashboard() {
       const isMe = myId && e.id === myId;
       const dt = new Date(e.createdAt || Date.now());
       const stamp = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,"0")}-${String(dt.getDate()).padStart(2,"0")} ${String(dt.getHours()).padStart(2,"0")}:${String(dt.getMinutes()).padStart(2,"0")}`;
+
+      const statusText = e.status === "GAME_OVER" ? "게임오버" : "완주";
+      const endedTurnText =
+        typeof e.endedAtTurn === "number" && Number.isFinite(e.endedAtTurn)
+          ? e.endedAtTurn
+          : 20;
+      
       return `
         <tr class="${isMe ? "trMe" : ""}">
           <td>${idx + 1}</td>
           <td>${escapeHtml(e.princessName)}</td>
+          <td>${statusText}</td>
+          <td>${endedTurnText}</td>
           <td><strong>${e.total}</strong></td>
           <td>${e.stats.hp}</td>
           <td>${e.stats.money}</td>
@@ -363,7 +432,7 @@ async function loadDashboard() {
     }).join("");
 
   } catch {
-    boardBody.innerHTML = `<tr><td colspan="9" class="muted">대시보드를 불러오지 못했다. 서버 실행 여부를 확인해줘.</td></tr>`;
+    boardBody.innerHTML = `<tr><td colspan="11" class="muted">대시보드를 불러오지 못했다. 서버 실행 여부를 확인해줘.</td></tr>`;
     myRankBox.innerHTML = `<div class="muted">대시보드 로드 실패</div>`;
   }
 }
@@ -377,6 +446,7 @@ function escapeHtml(str) {
     .replaceAll("'", "&#039;");
 }
 
+// Events
 startBtn.addEventListener("click", () => {
   const name = nameInput.value.trim();
   if (!name) return alert("공주 이름을 입력해줘.");

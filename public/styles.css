@@ -71,6 +71,11 @@ button{
   font-weight:700;
   font-size:14px;
 }
+
+.no-bullets {
+  padding-left: 0;
+}
+
 .primary{background:var(--primary);color:var(--primaryText)}
 .secondary{background:var(--secondary);color:var(--text)}
 .ghost{background:transparent;color:var(--text);border:1px solid var(--border)}
@@ -89,10 +94,8 @@ button:disabled{opacity:.5;cursor:not-allowed}
   color:var(--muted);
 }
 
-/* --- Game layout --- */
 .playArea{display:flex;flex-direction:column;gap:12px}
 
-/* 상황 왼쪽 + 정사각형 사진 오른쪽 */
 .situationRow{
   display:grid;
   grid-template-columns: 1fr 220px;
@@ -115,7 +118,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
   font-size:14px;
 }
 
-/* 사진 카드 */
 .photoCard{
   border:1px solid var(--border);
   border-radius:14px;
@@ -140,7 +142,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
   backface-visibility:hidden;
 }
 
-/* 선택 후 경험치 오버레이 */
 .photoOverlay{
   position:absolute;
   inset:0;
@@ -156,7 +157,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
 }
 .photoOverlay.hidden{display:none}
 
-/* “이 행동을 할까, 말까?” 영역은 얕게 */
 .promptBox{
   border:1px solid var(--border);
   border-radius:12px;
@@ -168,7 +168,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
 }
 .promptText{font-weight:900;line-height:1.4}
 
-/* Flip animation */
 .photoCard.flipping img{
   animation: flipY 520ms ease-in-out;
 }
@@ -212,7 +211,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .bigNumber{font-size:42px;font-weight:900;line-height:1}
 
 .tableWrap{overflow:auto;border:1px solid var(--border);border-radius:14px;margin-top:12px}
-.table{width:100%;border-collapse:collapse;min-width:920px;background:#fff}
+.table{width:100%;border-collapse:collapse;min-width:1100px;background:#fff}
 .table th,.table td{border-bottom:1px solid var(--border);padding:10px 10px;text-align:left;font-size:13px}
 .table th{background:#f9fafb;font-weight:900}
 .trMe{background:#f0f9ff}

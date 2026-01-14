@@ -29,27 +29,20 @@ function writeLeaderboard(entries) {
   fs.writeFileSync(DATA_PATH, JSON.stringify(entries, null, 2), "utf-8");
 }
 
-// Index (force HTML content-type)
+// Index
 app.get("/", (req, res) => {
   res.setHeader("Content-Type", "text/html; charset=UTF-8");
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// Static files
-app.use(
-  express.static(path.join(__dirname, "public"), {
-    setHeaders: (res, filePath) => {
-      if (filePath.endsWith(".html")) {
-        res.setHeader("Content-Type", "text/html; charset=UTF-8");
-      }
-    },
-  })
-);
+// Static
+app.use(express.static(path.join(__dirname, "public")));
 
 // Get leaderboard
 app.get("/api/leaderboard", (req, res) => {
   const entries = readLeaderboard();
 
+  // Sort: total desc, then createdAt asc
   entries.sort((a, b) => {
     if (b.total !== a.total) return b.total - a.total;
     return (a.createdAt ?? 0) - (b.createdAt ?? 0);
@@ -60,12 +53,11 @@ app.get("/api/leaderboard", (req, res) => {
 
 // Post score
 app.post("/api/score", (req, res) => {
-  const { princessName, stats, total } = req.body ?? {};
+  const { princessName, stats, total, status, endedAtTurn } = req.body ?? {};
 
   if (typeof princessName !== "string" || princessName.trim().length < 1) {
     return res.status(400).json({ ok: false, error: "princessName is required." });
   }
-
   const cleanName = princessName.trim().slice(0, 20);
 
   const requiredKeys = ["hp", "money", "charm", "intel", "social"];
@@ -78,17 +70,22 @@ app.post("/api/score", (req, res) => {
     return res.status(400).json({ ok: false, error: "stats/total are invalid." });
   }
 
+  const cleanStatus = status === "GAME_OVER" ? "GAME_OVER" : "COMPLETED";
+  const cleanEndedTurn =
+    typeof endedAtTurn === "number" && Number.isFinite(endedAtTurn) ? Math.max(1, Math.min(20, endedAtTurn)) : 20;
+
   const entry = {
     id: Math.random().toString(16).slice(2) + Date.now().toString(16),
     princessName: cleanName,
     stats,
     total,
-    createdAt: Date.now(),
+    status: cleanStatus,       // "COMPLETED" | "GAME_OVER"
+    endedAtTurn: cleanEndedTurn, // 1..20
+    createdAt: Date.now()
   };
 
   const entries = readLeaderboard();
   entries.push(entry);
-
   writeLeaderboard(entries.slice(-500));
 
   res.json({ ok: true, entry });
