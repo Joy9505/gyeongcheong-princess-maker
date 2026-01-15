@@ -26,7 +26,7 @@
     },
     "total": 39,
     "status": "COMPLETED",
-    "endedAtTurn": 20,
+    "endedAtTurn": 7,
     "createdAt": 1768407060000
   },
   {
@@ -64,12 +64,12 @@
     "princessName": "유진 공주",
     "stats": {
       "hp": 6,
-      "money": -1,
+      "money": 0,
       "charm": 5,
       "intel": 8,
       "social": 10
     },
-    "total": 28,
+    "total": 29,
     "status": "GAME_OVER",
     "endedAtTurn": 15,
     "createdAt": 1768443420000
