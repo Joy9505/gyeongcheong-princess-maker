@@ -25,8 +25,8 @@
       "social": 11
     },
     "total": 39,
-    "status": "GAME_OVER",
-    "endedAtTurn": 7,
+    "status": "COMPLETED",
+    "endedAtTurn": 20,
     "createdAt": 1768407060000
   },
   {
@@ -40,7 +40,7 @@
       "social": 10
     },
     "total": 38,
-    "status": "COMPLETED",
+    "status": "GAME_OVER",
     "endedAtTurn": 19,
     "createdAt": 1768408200000
   },
