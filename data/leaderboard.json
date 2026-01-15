@@ -18,6 +18,21 @@
     "id": "manual-002",
     "princessName": "쏘영 공주",
     "stats": {
+      "hp": 9,
+      "money": 4,
+      "charm": 13,
+      "intel": 8,
+      "social": 9
+    },
+    "total": 43,
+    "status": "COMPLETED",
+    "endedAtTurn": 20,
+    "createdAt": 1768444260000
+  },
+  {
+    "id": "manual-008",
+    "princessName": "쏘영 공주",
+    "stats": {
       "hp": 3,
       "money": 3,
       "charm": 9,
@@ -26,7 +41,7 @@
     },
     "total": 39,
     "status": "COMPLETED",
-    "endedAtTurn": 7,
+    "endedAtTurn": 20,
     "createdAt": 1768407060000
   },
   {
