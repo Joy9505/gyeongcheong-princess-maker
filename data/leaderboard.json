@@ -1,1 +1,92 @@
-[]
+[
+  {
+    "id": "manual-001",
+    "princessName": "나는야화니공주2",
+    "stats": {
+      "hp": 7,
+      "money": 1,
+      "charm": 12,
+      "intel": 12,
+      "social": 12
+    },
+    "total": 44,
+    "status": "COMPLETED",
+    "endedAtTurn": 20,
+    "createdAt": 1768442280000
+  },
+  {
+    "id": "manual-002",
+    "princessName": "쏘영 공주",
+    "stats": {
+      "hp": 3,
+      "money": 3,
+      "charm": 9,
+      "intel": 13,
+      "social": 11
+    },
+    "total": 39,
+    "status": "GAME_OVER",
+    "endedAtTurn": 7,
+    "createdAt": 1768407060000
+  }  
+  {
+    "id": "manual-003",
+    "princessName": "유진 공주2",
+    "stats": {
+      "hp": 0,
+      "money": 4,
+      "charm": 10,
+      "intel": 14,
+      "social": 10
+    },
+    "total": 38,
+    "status": "COMPLETED",
+    "endedAtTurn": 19,
+    "createdAt": 1768408200000
+  }
+  {
+    "id": "manual-004",
+    "princessName": "지원공듀",
+    "stats": {
+      "hp": 2,
+      "money": 2,
+      "charm": 5,
+      "intel": 8,
+      "social": 11
+    },
+    "total": 28,
+    "status": "COMPLETED",
+    "endedAtTurn": 20,
+    "createdAt": 1768408200000
+  }
+  {
+    "id": "manual-005",
+    "princessName": "유진 공주",
+    "stats": {
+      "hp": 6,
+      "money": -1,
+      "charm": 5,
+      "intel": 8,
+      "social": 10
+    },
+    "total": 28,
+    "status": "GAME_OVER",
+    "endedAtTurn": 15,
+    "createdAt": 1768443420000
+  }
+  {
+    "id": "manual-006",
+    "princessName": "지원공듀",
+    "stats": {
+      "hp": 3,
+      "money": 0,
+      "charm": 5,
+      "intel": 5,
+      "social": 7
+    },
+    "total": 20,
+    "status": "GAME_OVER",
+    "endedAtTurn": 6,
+    "createdAt": 1768408800000
+  }
+]
