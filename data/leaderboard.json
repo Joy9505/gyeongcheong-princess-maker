@@ -28,7 +28,7 @@
     "status": "GAME_OVER",
     "endedAtTurn": 7,
     "createdAt": 1768407060000
-  }  
+  },
   {
     "id": "manual-003",
     "princessName": "유진 공주2",
@@ -43,7 +43,7 @@
     "status": "COMPLETED",
     "endedAtTurn": 19,
     "createdAt": 1768408200000
-  }
+  },
   {
     "id": "manual-004",
     "princessName": "지원공듀",
@@ -58,7 +58,7 @@
     "status": "COMPLETED",
     "endedAtTurn": 20,
     "createdAt": 1768408200000
-  }
+  },
   {
     "id": "manual-005",
     "princessName": "유진 공주",
@@ -73,7 +73,7 @@
     "status": "GAME_OVER",
     "endedAtTurn": 15,
     "createdAt": 1768443420000
-  }
+  },
   {
     "id": "manual-006",
     "princessName": "지원공듀",
